@@ -1,9 +1,8 @@
 'use client';
 import { useState,useEffect } from "react";
 import Search from '@/app/ui/search';
-import CurrentWeather from "./currentWeather";
 import Forecast5D from '@/app/ui/home/forecast5d'
-import UnitButton, { Button } from "./button";
+import UnitButton from "./button";
 import { LocalCard } from "./home/cards";
 
 type Location ={
@@ -85,7 +84,7 @@ export default function CompleteWeather(){
             <Search placeholder="Search a city..." setPlaceId={setPlaceId} />
         </div>
         {location && (
-            <Forecast5D lat={location?.latitude} lon={location?.longitude} units={units} converter={convertTemperature} />
+            <Forecast5D lat={location?.latitude.toString()} lon={location?.longitude.toString()} units={units} converter={convertTemperature} />
         )}
         </>
     )

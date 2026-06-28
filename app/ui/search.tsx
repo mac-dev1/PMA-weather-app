@@ -26,12 +26,21 @@ type SearchBarProps = {
     setPlaceId: React.Dispatch<React.SetStateAction<string>>;
 };
 
+type GoogleSuggestion = {
+    placePrediction:{
+        placeId:string,
+        text:{
+            text:string
+        }
+    }
+}
+
 export default function SearchBar({
     placeholder,
     setPlaceId,
 }: SearchBarProps) {
     const [query, setQuery] = useState("");
-    const [suggestions, setSuggestions] = useState([]);
+    const [suggestions, setSuggestions] = useState<Array<GoogleSuggestion>>([]);
     const [error, setError] = useState<string | null>(null);
     const [isOpen, setIsOpen] = useState(false);
 
@@ -129,7 +138,7 @@ export default function SearchBar({
                 value={query}
                 onChange={(e) => {
                     setQuery(e.target.value);
-                    setPlaceId(null);
+                    setPlaceId("");
                     setIsOpen(true);
                 }}
                 onFocus={() => setIsOpen(true)}

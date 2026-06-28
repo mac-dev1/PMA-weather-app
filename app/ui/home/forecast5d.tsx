@@ -2,9 +2,10 @@
 
 import {useState, useEffect} from 'react';
 import { Card, MainCard } from "@/app/ui/home/cards";
+import { Forecast } from "@/app/lib/definitions"
 
 export default function Forecast5D({lat, lon,units,converter}:{lat:string,lon:string,units:"metric"|"standard"|"imperial",converter:Function}){
-   const [forecast, setForecast] = useState(null);
+   const [forecast, setForecast] = useState<Forecast|null>(null);
    const [time, setTime] = useState(new Date())
    const [error, setError] = useState<string|null>(null)
 

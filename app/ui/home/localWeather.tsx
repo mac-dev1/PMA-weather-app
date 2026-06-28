@@ -1,8 +1,20 @@
 import { useEffect, useState } from 'react'; 
 import Image from 'next/image';
 
+type googleWeather = {
+    weatherCondition:{
+        iconBaseUri: string,
+        description: {
+        text: string
+        },
+    },
+    temperature: {
+        degrees: number,
+    }
+}
+
 export default function LocalWeather({lat,lon,converter}:{lat:number,lon:number,converter:Function}){
-    const [temperate, setTemperate] = useState({})
+    const [temperate, setTemperate] = useState<googleWeather|null>(null)
     const [error, setError] = useState<string | null>(null);
 
     useEffect(()=>{
@@ -30,6 +42,10 @@ export default function LocalWeather({lat,lon,converter}:{lat:number,lon:number,
                 {error}
             </div>
         );
+    }
+
+    if(!temperate){
+        return
     }
 
     if(!temperate.weatherCondition){

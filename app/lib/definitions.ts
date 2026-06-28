@@ -38,6 +38,49 @@ export type DailyTemp = {
   snow: number,
 }
 
+type Wind = {
+    speed: number;
+    dir: string;
+    angle: number;
+};
+
+type CloudCover = {
+    total: number;
+};
+
+type Precipitation = {
+    total: number;
+    type: string;
+};
+
+type Period = {
+    weather: string;
+    icon: number;
+    temperature: number;
+    temperature_min: number;
+    temperature_max: number;
+    wind: Wind;
+    cloud_cover: CloudCover;
+    precipitation: Precipitation;
+};
+
+export type ForecastDay = {
+    day: string;
+    weather: string;
+    icon: number;
+    summary: string;
+    all_day: Period;
+    morning: Period | null;
+    afternoon: Period | null;
+    evening: Period | null;
+};
+
+export type Forecast = {
+  daily:{
+    data: Array<ForecastDay>
+  }
+}
+
 
 // FINISH OF WEATHER APP
 // FINISH OF WEATHER APP

@@ -18,19 +18,6 @@ const iconMap = {
   cloudy: UserGroupIcon,
 };
 
-export default async function CardWrapper() {
-  return (
-    <>
-      {/* NOTE: Uncomment this code in Chapter 9 */}
-
-      <Card date="Collected 0" icon='cloudy' max={13} min={0} />
-      <Card date="Collected 1" icon='cloudy' max={15} min={2} />
-      <Card date="Collected 2" icon='cloudy' max={13} min={4} />
-      <Card date="Collected 3" icon='cloudy' max={10} min={-1} />
-      <Card date="Collected 4" icon='cloudy' max={11} min={2} />
-    </>
-  );
-}
 
 const dayOfWeek = ['Sun',
   'Mon',
@@ -72,8 +59,18 @@ export function Card({
   );
 }
 
+type dailyInfo = {
+  icon:number,
+  weather:string,
+  all_day:{
+    temperature:number,
+    temperature_max:number,
+    temperature_min:number
+  },
+  summary:string
+}
 
-export function MainCard({current, converter, time}){
+export function MainCard({current, converter, time}:{current:dailyInfo,converter:Function,time:Date}){
   return(
     <>
       <h3 className="ml-2 text-md font-medium text-center no-wrap">Condition at {time.getHours().toString().padStart(2, '0') + ':' + time .getMinutes().toString().padStart(2, '0')}</h3>
