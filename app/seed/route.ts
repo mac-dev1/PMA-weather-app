@@ -2,9 +2,11 @@ import bcrypt from 'bcrypt';
 import postgres from 'postgres';
 //import { invoices, customers, revenue, users } from '../lib/placeholder-data';
 
+import { dailyTemps, users } from '../lib/placeholder-data';
+
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
-/*
+
 async function seedUsers() {
   await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
   await sql`
@@ -30,6 +32,58 @@ async function seedUsers() {
   return insertedUsers;
 }
 
+async function seedDailyTemp(){
+  await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS dailyTemp (
+      id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+      lat DECIMAL(5,2) NOT NULL,
+      lon DECIMAL(5,2) NOT NULL,
+      timezone VARCHAR(255) NOT NULL,
+      timezone_offset INT NOT NULL,
+      dt INT NOT NULL,
+      sunrise INT NOT NULL,
+      sunset INT NOT NULL,
+      moonrise INT NOT NULL,
+      moonset INT NOT NULL,
+      moon_phase DECIMAL(5,3),
+      day_temp DECIMAL(5,2) NOT NULL,
+      min_temp DECIMAL(5,2) NOT NULL,
+      max_temp DECIMAL(5,2) NOT NULL,
+      night_temp DECIMAL(5,2) NOT NULL,
+      eve_temp DECIMAL(5,2) NOT NULL,
+      morn_temp DECIMAL(5,2) NOT NULL,
+      pressure DECIMAL(7,2) NOT NULL,
+      humidity DECIMAL(5,2) NOT NULL,
+      wind_speed DECIMAL(5,2) NOT NULL,
+      wind_deg DECIMAL(5,2) NOT NULL,
+      weather VARCHAR(255),
+      clouds DECIMAL(5,2) NOT NULL,
+      uvi DECIMAL (5,2) NOT NULL
+    );
+  `;
+
+  const insertedDailyTemps = await Promise.all(
+    dailyTemps.map(
+      (dailyTemp) => sql`
+        INSERT INTO dailyTemp (id, lat, lon, timezone, timezone_offset, dt, sunrise, sunset, moonrise, moonset,
+        moon_phase, day_temp, min_temp, max_temp, night_temp, eve_temp, morn_temp, pressure,
+        humidity, wind_speed, wind_deg, clouds, uvi)
+        VALUES (${dailyTemp.id}, ${dailyTemp.lat}, ${dailyTemp.lon}, ${dailyTemp.timezone}, ${dailyTemp.timezone_offset},
+        ${dailyTemp.dt}, ${dailyTemp.sunrise}, ${dailyTemp.sunset}, ${dailyTemp.moonrise}, ${dailyTemp.moonset},
+        ${dailyTemp.moon_phase}, ${dailyTemp.day_temp}, ${dailyTemp.min_temp}, ${dailyTemp.max_temp}, 
+        ${dailyTemp.night_temp}, ${dailyTemp.eve_temp}, ${dailyTemp.morn_temp}, ${dailyTemp.pressure},
+        ${dailyTemp.humidity}, ${dailyTemp.wind_speed},${dailyTemp.wind_deg}, ${dailyTemp.clouds}, ${dailyTemp.uvi})
+        ON CONFLICT (id) DO NOTHING;
+      `,
+    ),
+  );
+
+  return insertedDailyTemps;
+}
+
+/*
 async function seedInvoices() {
   await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
 
@@ -101,14 +155,12 @@ async function seedRevenue() {
 
   return insertedRevenue;
 }
-
+*/
 export async function GET() {
   try {
     const result = await sql.begin((sql) => [
       seedUsers(),
-      seedCustomers(),
-      seedInvoices(),
-      seedRevenue(),
+      seedDailyTemp()
     ]);
 
     return Response.json({ message: 'Database seeded successfully' });
@@ -116,4 +168,3 @@ export async function GET() {
     return Response.json({ error }, { status: 500 });
   }
 }
-*/

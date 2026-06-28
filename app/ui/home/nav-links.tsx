@@ -16,7 +16,7 @@ const links = [
   { name: 'Home', href: '/home', icon: HomeIcon },
   {
     name: 'Historic Data',
-    href: '/historic',
+    href: '/home/historic',
     icon: CalendarDateRangeIcon,
   }
 ];

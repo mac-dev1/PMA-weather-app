@@ -11,7 +11,7 @@ const users = [
 
 // WEATHER APP
 // WEATHER APP
-const dailyTemp = [
+const dailyTemps = [
   {
     id: 'fb3a9821-5929-4372-8c4b-d39beecb524a',
     lat: 51.5,
@@ -282,6 +282,8 @@ const dailyTemp = [
     uvi: 0
   }
 ]
+
+export { users,dailyTemps }
 // WEATHER APP
 // WEATHER APP
 

@@ -1,19 +1,29 @@
-import clsx from 'clsx';
+import clsx from "clsx";
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  children: React.ReactNode;
-}
+type UnitButtonProps = {
+    label: string;
+    value: "metric" | "imperial" | "standard";
+    selected: boolean;
+    onClick: (value: "metric" | "imperial" | "standard") => void;
+};
 
-export function Button({ children, className, ...rest }: ButtonProps) {
-  return (
-    <button
-      {...rest}
-      className={clsx(
-        'flex h-10 items-center rounded-lg bg-blue-500 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 active:bg-blue-600 aria-disabled:cursor-not-allowed aria-disabled:opacity-50',
-        className,
-      )}
-    >
-      {children}
-    </button>
-  );
+export default function UnitButton({
+    label,
+    value,
+    selected,
+    onClick,
+}: UnitButtonProps) {
+    return (
+        <button
+            onClick={() => onClick(value)}
+            className={clsx(
+                "rounded-md px-2 ml-2 transition-colors",
+                selected
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+            )}
+        >
+            {label}
+        </button>
+    );
 }
