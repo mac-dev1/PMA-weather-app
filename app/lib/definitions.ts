@@ -16,7 +16,7 @@ export type DailyTemp = {
   lon: number,
   timezone: string,
   timezone_offset: number,
-  dt: number,
+  dt: Date,
   sunrise: number,
   sunset: number,
   moonrise: number,
@@ -36,6 +36,7 @@ export type DailyTemp = {
   clouds: number,
   rain: number,
   snow: number,
+  uvi:number
 }
 
 type Wind = {
@@ -79,6 +80,78 @@ export type Forecast = {
   daily:{
     data: Array<ForecastDay>
   }
+}
+
+export type Query = {
+    placeId: string;
+    start: string;
+    end: string;
+};
+
+export type OpenWeatherDay ={
+    dt: number,
+    timezone:string,
+    timezone_offset:number,
+    sunrise: number,
+    sunset: number,
+    moonrise: number,
+    moonset: number,
+    moon_phase: number,
+    temp: {
+        day: number,
+        min: number,
+        max: number,
+        night: number,
+        eve: number,
+        morn: number,
+    },
+    feels_like: {
+        day: number,
+        night: number,
+        eve: number,
+        morn: number,
+    },
+    pressure: number,
+    humidity: number,
+    wind_speed: number,
+    wind_deg: number,
+    weather: null,
+    clouds:number,
+    rain:number|null,
+    snow:number|null,
+    uvi: number
+}
+
+export function parseForecast(forecast:OpenWeatherDay,lat:number,lon:number){
+    const parsed:DailyTemp = {
+      id: "",
+      lat: lat,
+      lon: lon,
+      timezone: forecast.timezone,
+      timezone_offset: forecast.timezone_offset,
+      dt: new Date(forecast.dt*1000),
+      sunrise: forecast.sunrise,
+      sunset: forecast.sunset,
+      moonrise: forecast.moonrise,
+      moonset: forecast.moonset,
+      moon_phase: forecast.moon_phase,
+      day_temp: forecast.temp.day,
+      min_temp: forecast.temp.min,
+      max_temp: forecast.temp.max,
+      night_temp: forecast.temp.night,
+      eve_temp: forecast.temp.eve,
+      morn_temp: forecast.temp.morn,
+      pressure: forecast.pressure,
+      humidity: forecast.humidity,
+      wind_speed: forecast.wind_speed,
+      wind_deg: forecast.wind_deg,
+      weather_icon: "",
+      clouds: forecast.clouds,
+      rain: forecast.rain?forecast.rain:0,
+      snow: forecast.snow?forecast.snow:0,
+      uvi:forecast.uvi
+    }
+    return parsed
 }
 
 

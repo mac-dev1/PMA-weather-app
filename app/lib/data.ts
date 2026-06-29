@@ -1,3 +1,5 @@
+'use server'
+
 import postgres from 'postgres';
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
@@ -6,14 +8,42 @@ const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 // WEATHER APP
 import { DailyTemp } from './definitions';
 
-export async function fetchTemperate(){
+export async function fetchWeather({lat,lon,start,end}:{lat:number,lon:number,start:string,end:string}){
+  
   try{
-    const data = await sql<DailyTemp[]>`SELECT * FROM dailyTemp`;
-    return data
+    const data = await sql<DailyTemp[]>`
+    SELECT * 
+    FROM dailyTemp
+    WHERE 
+    (lat BETWEEN ${lat-0.05} AND ${lat+0.05}) AND
+    (lon BETWEEN ${lon-0.05} AND ${lon+0.05}) AND
+    (dt BETWEEN ${start} AND ${end})
+    ORDER BY dt`;
+    
+   return data
   }catch(error){
-    console.error('Failed to fetch database')
+    console.error('Database error:',error)
+    throw new Error('Failed to fetch revenue data.');
   }
 }
+
+export async function createWeather(weatherData:DailyTemp){
+  await sql `
+  INSERT INTO dailytemp (lat,lon,timezone,timezone_offset,dt,sunrise,sunset,moonrise,moonset,
+  moon_phase,day_temp,min_temp,max_temp,night_temp,eve_temp,morn_temp,pressure,humidity,
+  wind_speed,wind_deg,clouds,uvi)
+  VALUES (
+    ${weatherData.lat},${weatherData.lon},${weatherData.timezone},${weatherData.timezone_offset},
+    ${weatherData.dt},${weatherData.sunrise},${weatherData.sunset},${weatherData.moonrise},
+    ${weatherData.moonset},${weatherData.moon_phase},${weatherData.day_temp},${weatherData.min_temp},
+    ${weatherData.max_temp},${weatherData.night_temp},${weatherData.eve_temp},
+    ${weatherData.morn_temp},${weatherData.pressure},${weatherData.humidity},
+    ${weatherData.wind_speed},${weatherData.wind_deg},${weatherData.clouds},${weatherData.uvi}
+  ) ON CONFLICT (lat, lon, dt)
+  DO NOTHING
+  `
+}
+
 // WEATHER APP
 // WEATHER APP
 /*

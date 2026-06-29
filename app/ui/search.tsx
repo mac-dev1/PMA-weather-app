@@ -58,7 +58,7 @@ export default function SearchBar({
         const timer = setTimeout(async () => {
             try{
                 const response = await fetch(
-                    `autocomplete?input=${encodeURIComponent(query)}`
+                    `/autocomplete?input=${encodeURIComponent(query)}`
                 );
                 if (!response.ok) {
                     const error = await response.json();

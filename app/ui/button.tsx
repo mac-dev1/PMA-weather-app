@@ -12,9 +12,10 @@ export default function UnitButton({
     value,
     selected,
     onClick,
-}: UnitButtonProps) {
+}: UnitButtonProps,key?:string) {
     return (
         <button
+            key={key}
             onClick={() => onClick(value)}
             className={clsx(
                 "rounded-md px-2 ml-2 transition-colors",
@@ -25,5 +26,19 @@ export default function UnitButton({
         >
             {label}
         </button>
+    );
+}
+
+type UnitButtonWrapperProps = {
+    props: UnitButtonProps[];
+};
+
+export function UnitButtonWrapper({ props }: UnitButtonWrapperProps){
+    return (
+        <>
+            {props.map((prop) => (
+                <UnitButton key={prop.value} {...prop} />
+            ))}
+        </>
     );
 }
