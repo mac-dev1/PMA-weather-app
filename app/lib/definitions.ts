@@ -27,7 +27,7 @@ export type DailyTemp = {
   max_temp: number,
   night_temp: number,
   eve_temp: number,
-  morn_temp:number
+  morn_temp:number,
   pressure: number,
   humidity: number,
   wind_speed: number,
@@ -89,6 +89,7 @@ export type Query = {
 };
 
 export type OpenWeatherDay ={
+    id:string,
     dt: number,
     timezone:string,
     timezone_offset:number,
@@ -124,7 +125,7 @@ export type OpenWeatherDay ={
 
 export function parseForecast(forecast:OpenWeatherDay,lat:number,lon:number){
     const parsed:DailyTemp = {
-      id: "",
+      id: forecast.id,
       lat: lat,
       lon: lon,
       timezone: forecast.timezone,

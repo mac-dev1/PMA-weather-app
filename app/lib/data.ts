@@ -1,6 +1,6 @@
 'use server'
 
-import postgres from 'postgres';
+import postgres, { Row, RowList } from 'postgres';
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
@@ -9,7 +9,8 @@ const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 import { DailyTemp } from './definitions';
 
 export async function fetchWeather({lat,lon,start,end}:{lat:number,lon:number,start:string,end:string}){
-  
+  console.log("Query limits:",lat-0.05,lat+0.05,lon-0.05,lon+0.05)
+  console.log("Dates:",start,end)
   try{
     const data = await sql<DailyTemp[]>`
     SELECT * 
@@ -27,21 +28,41 @@ export async function fetchWeather({lat,lon,start,end}:{lat:number,lon:number,st
   }
 }
 
-export async function createWeather(weatherData:DailyTemp){
-  await sql `
+export async function createWeather(weatherData:DailyTemp[]){
+  console.log(weatherData)
+  const created = await sql `
   INSERT INTO dailytemp (lat,lon,timezone,timezone_offset,dt,sunrise,sunset,moonrise,moonset,
   moon_phase,day_temp,min_temp,max_temp,night_temp,eve_temp,morn_temp,pressure,humidity,
   wind_speed,wind_deg,clouds,uvi)
-  VALUES (
-    ${weatherData.lat},${weatherData.lon},${weatherData.timezone},${weatherData.timezone_offset},
-    ${weatherData.dt},${weatherData.sunrise},${weatherData.sunset},${weatherData.moonrise},
-    ${weatherData.moonset},${weatherData.moon_phase},${weatherData.day_temp},${weatherData.min_temp},
-    ${weatherData.max_temp},${weatherData.night_temp},${weatherData.eve_temp},
-    ${weatherData.morn_temp},${weatherData.pressure},${weatherData.humidity},
-    ${weatherData.wind_speed},${weatherData.wind_deg},${weatherData.clouds},${weatherData.uvi}
-  ) ON CONFLICT (lat, lon, dt)
+  VALUES ${sql(weatherData.map(weather =>[
+            weather.lat,
+            weather.lon,
+            weather.timezone,
+            weather.timezone_offset,
+            weather.dt.toISOString(),
+            weather.sunrise,
+            weather.sunset,
+            weather.moonrise,
+            weather.moonset,
+            weather.moon_phase,
+            weather.day_temp,
+            weather.min_temp,
+            weather.max_temp,
+            weather.night_temp,
+            weather.eve_temp,
+            weather.morn_temp,
+            weather.pressure,
+            weather.humidity,
+            weather.wind_speed,
+            weather.wind_deg,
+            weather.clouds,
+            weather.uvi
+  ])
+  )} ON CONFLICT (lat, lon, dt)
   DO NOTHING
+  RETURNING *;
   `
+  return created
 }
 
 // WEATHER APP

@@ -1,14 +1,23 @@
 import { DailyTemp } from "@/app/lib/definitions"
 import { throwDeprecation } from "process";
+import { TrashIcon,PencilSquareIcon } from "@heroicons/react/24/outline";
+import { deleteWeather } from "@/app/lib/actions";
 
-type TableData={
-    data:Array<Omit<DailyTemp,'dt'>&{dt:string}>|null,
-    loading:Boolean,
-    error:string,
-    units:string
+type TableProps={
+    data:Array<Omit<DailyTemp,'dt'>&{dt:string}>|null;
+    loading:Boolean;
+    error:string;
+    units:string;
+    deleteDate: (
+        item: Omit<DailyTemp, "dt"> & { dt: string }
+    ) => void | Promise<void>;
+    editDate:(
+        item: Omit<DailyTemp, "dt"> & { dt: string }
+    ) => void | Promise<void>
 }
 
-export default function HistoricTable({data,loading,error,units}:TableData){
+export default function HistoricTable({data,loading,error,units,deleteDate,editDate}:TableProps){
+    
     if (loading)
         return <p>Fetching...</p>;
 
@@ -31,7 +40,7 @@ export default function HistoricTable({data,loading,error,units}:TableData){
                 return temp + 'K'
         }
     }
-
+    
     return(
         <div className="grid overflow-x-auto rounded-lg border">
             <table className="min-w-[1100px] table-auto">
@@ -45,20 +54,32 @@ export default function HistoricTable({data,loading,error,units}:TableData){
                         <th>Clouds</th>
                         <th>Wind</th>
                         <th>Pressure</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
                     </tr>
                 </thead>
                 <tbody className="text-center border">
                     {
                         data.map((item)=>
-                        <tr key={item.dt} >
-                            <td className="border">{item.dt}</td>
-                            <td className="border">{item.lat.toString().padEnd(7,'0')}</td>
-                            <td className="border">{item.lon.toString().padEnd(8,'0')}</td>
+                        <tr key={item.id} >
+                            <td className="border">{item.dt.split('T')[0].replaceAll('-','/').split('/').reverse().join('/')}</td>
+                            <td className="border">{Number(item.lat).toFixed(4)}</td>
+                            <td className="border">{Number(item.lon).toFixed(4)}</td>
                             <td className="border">{convertTemp(item.max_temp)}</td>
                             <td className="border">{convertTemp(item.min_temp)}</td>
                             <td className="border">{item.clouds}</td>
                             <td className="border">{item.wind_speed}</td>
                             <td className="border">{item.pressure}</td>
+                            <td>
+                                <button onClick={() => editDate(item)}>
+                                    <PencilSquareIcon className="w-4" />
+                                </button>
+                            </td>
+                            <td>
+                                <button onClick={() => deleteDate(item)}>
+                                    <TrashIcon className="w-4"/>
+                                </button>
+                            </td>
                         </tr>
                         )
                     }

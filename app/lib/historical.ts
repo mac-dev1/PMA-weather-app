@@ -26,8 +26,11 @@ export async function fetchMissingWeather(
         starts.map(async (item) => {                                                   // expect time in seconds
             const response = await fetch(`/historicWeather?lat=${lat}&lon=${lon}&start=${item.start/1000}&cnt=${item.count}`);
             const data = await response.json()
-            return data.data.map((item:DailyTemp) =>{
-                return {...item,timezone:data.timezone,timezone_offset:data.timezone_offset,}
+            console.log(data)
+            return data.data.map((item:Omit<DailyTemp,'dt'>&{dt:number}) =>{
+                return {...item,
+                        timezone:data.timezone,
+                        timezone_offset:data.timezone_offset,}
         });
         })
     );
