@@ -4,9 +4,9 @@ import { DailyTemp, parseForecast } from "./definitions";
 export function chunkDates(dates: string[], size = 10) {
     const starts = [];
     
-    for (let i = 0; i < dates.length; i += size) {
+    for (let i = 0; i < dates.length; i += size+1) {
         const start = new Date(dates[i]).getTime()
-        const end = dates[i+10]? new Date(dates[i+10]).getTime():new Date(dates[dates.length - 1]).getTime()
+        const end = dates[i+10]? new Date(dates[i+size]).getTime():new Date(dates[dates.length - 1]).getTime()
         const count = (end-start)/1000/60/60/24 +1
         starts.push({start,count});
     }
@@ -20,13 +20,12 @@ export async function fetchMissingWeather(
     dates: string[]
 ){
     
-    const starts = chunkDates(dates, 10);
+    const starts = chunkDates(dates, 9);
     
     const responses = await Promise.all(
-        starts.map(async (item) => {                                                   // expect time in seconds
-            const response = await fetch(`/historicWeather?lat=${lat}&lon=${lon}&start=${item.start/1000}&cnt=${item.count}`);
+        starts.map(async (item) => {                                               // expect time in seconds
+            const response = await fetch(`/api/historicWeather?lat=${lat}&lon=${lon}&start=${item.start/1000}&cnt=${item.count}`);
             const data = await response.json()
-            console.log(data)
             return data.data.map((item:Omit<DailyTemp,'dt'>&{dt:number}) =>{
                 return {...item,
                         timezone:data.timezone,

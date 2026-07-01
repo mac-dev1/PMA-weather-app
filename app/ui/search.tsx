@@ -45,27 +45,29 @@ export default function SearchBar({
     const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {
-        if (query.length < 2) {
-            setSuggestions([]);
-            return;
-        }
-
-        if (isCoordinates(query)) {
-            setSuggestions([]);
-            return;
-        }
+        
 
         const timer = setTimeout(async () => {
+            setError(null)
+                if (query.length < 2) {
+                    setSuggestions([]);
+                    return;
+                }
+
+                if (isCoordinates(query)) {
+                    setSuggestions([]);
+                    return;
+                }
             try{
                 const response = await fetch(
-                    `/autocomplete?input=${encodeURIComponent(query)}`
+                    `/api/autocomplete?input=${encodeURIComponent(query)}`
                 );
                 if (!response.ok) {
                     const error = await response.json();
                     setError(error.error);
                     return;
                 }
-
+                
                 const data = await response.json();
 
                 setSuggestions(data.suggestions ?? []);
@@ -104,17 +106,21 @@ export default function SearchBar({
             const [lat, lon] = place
                 .split(",")
                 .map((value) => Number(value.trim()));
+            try{
+                const response = await fetch(
+                    `/api/placeFromCoords?lat=${lat}&lon=${lon}`
+                );
+                //throw Error()
+                const data = await response.json();
 
-            const response = await fetch(
-                `/placeFromCoords?lat=${lat}&lon=${lon}`
-            );
-
-            const data = await response.json();
-
-            id = data.results[0].place_id;
-            place = data.results[0].formatted_address;
+                id = data.results[0].place_id;
+                place = data.results[0].formatted_address;
+            }catch{
+                setError("Couldn't transform coordinates to place. Try again later.")
+                setIsOpen(true)
+                return
+            }
         }
-
         setQuery(place);
         setPlaceId(id);
     };
@@ -122,15 +128,7 @@ export default function SearchBar({
     const showDropdown =
         isOpen &&
         query.length > 0 &&
-        (isCoordinates(query) || suggestions.length > 0);
-
-    if (error) {
-        return (
-            <div className="rounded-xl bg-red-100 p-4">
-                {error}
-            </div>
-        );
-    }
+        (isCoordinates(query) || suggestions.length > 0 || error);
 
     return (
         <div ref={wrapperRef} className="relative w-full">
@@ -148,16 +146,16 @@ export default function SearchBar({
 
             {showDropdown && (
                 <ul className="absolute left-0 right-0 mt-1 bg-white border rounded-md shadow-lg z-50">
-                    {isCoordinates(query) && (
+                    {!error && (isCoordinates(query) && (
                         <li
                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                             onClick={() => select(query, query)}
                         >
                             {query}
                         </li>
-                    )}
+                    ))}
 
-                    {suggestions.map((place) => (
+                    {!error && (suggestions.map((place) => (
                         <li
                             key={place.placePrediction.placeId}
                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -170,7 +168,12 @@ export default function SearchBar({
                         >
                             {place.placePrediction.text.text}
                         </li>
-                    ))}
+                    )))}
+                    {error &&(
+                        <li className="bg-red-100 p-4">{error}</li>
+                    )
+
+                    }
                 </ul>
             )}
         </div>

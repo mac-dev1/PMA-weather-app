@@ -1,22 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-
-import {
-  BanknotesIcon,
-  ClockIcon,
-  UserGroupIcon,
-  InboxIcon,
-} from '@heroicons/react/24/outline';
 import { lusitana } from '@/app/ui/fonts';
 import Image from 'next/image';
 import LocalWeather from "./localWeather";
-
-const iconMap = {
-  sunny: BanknotesIcon,
-  cloudy: UserGroupIcon,
-};
 
 
 const dayOfWeek = ['Sun',
@@ -41,7 +28,7 @@ export function Card({
   max: number;
   min: number
 }) {
-  console.log("Rendering Card " + date)
+  
   const formattedDate = dayOfWeek[date.getDay()] + ' ' + date.getDate() + '/' + (date.getMonth()+1)
   return (
     <div className="rounded-xl bg-gray-50 p-2 shadow-sm">
@@ -104,38 +91,43 @@ export function LocalCard({converter}:{converter:Function}){
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-      if (!navigator.geolocation) {
-          setError("Geolocation is not supported by your browser.");
-          setLoading(false);
-          return;
-      }
-
-      navigator.geolocation.getCurrentPosition(
-          (position) => {
-              setLocation({
-                  latitude: position.coords.latitude,
-                  longitude: position.coords.longitude,
-              });
+      const requestLocation = () => {
+          if (!navigator.geolocation) {
+              setError("Geolocation is not supported.");
               setLoading(false);
-          },
-          (err) => {
-              switch (err.code) {
-                  case err.PERMISSION_DENIED:
-                      setError("Location permission denied.");
-                      break;
-                  case err.POSITION_UNAVAILABLE:
-                      setError("Location unavailable.");
-                      break;
-                  case err.TIMEOUT:
-                      setError("Location request timed out.");
-                      break;
-                  default:
-                      setError("Unable to retrieve your location.");
-              }
-
-              setLoading(false);
+              return;
           }
-      );
+
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+                setLocation({
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                });
+                setLoading(false);
+            },
+            (err) => {
+                switch (err.code) {
+                    case err.PERMISSION_DENIED:
+                        setError("Location permission denied.");
+                        break;
+                    case err.POSITION_UNAVAILABLE:
+                        setError("Location unavailable.");
+                        break;
+                    case err.TIMEOUT:
+                        setError("Location request timed out.");
+                        break;
+                    default:
+                        setError("Unable to retrieve your location.");
+                }
+
+                setLoading(false);
+            }
+        );
+      };
+
+    requestLocation();
+      
   }, []);
 
   if (loading) {

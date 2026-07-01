@@ -2,14 +2,16 @@
 
 import { useEffect, useRef, useState } from "react";
 import { DailyTemp } from "@/app/lib/definitions"
-import { ArrowDownTrayIcon } from "@heroicons/react/24/outline"
 import  { exportCSV, exportJSON, exportMD, exportPDF, exportXML} from "@/app/lib/export-data";
+import { convertTemp } from "@/app/lib/utils";
+import { ArrowDownIcon } from "@heroicons/react/24/outline";
 
 type ExportProps = {
-    data: (Omit<DailyTemp,"dt">&{dt:string})[]
+    data: (Omit<DailyTemp,"dt">&{dt:string})[],
+    units:"metric" | "standard" | "imperial"
 }
 
-export function ExportButton(data:ExportProps){
+export function ExportButton({data,units}:ExportProps){
     const [open, setOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
     
@@ -48,34 +50,49 @@ export function ExportButton(data:ExportProps){
 
         URL.revokeObjectURL(url);
     }
-    //download(csv,"weather.csv","text/csv");
+    
+    const exportData = data.map(item=>({
+        ...item,
+        lat:Number(item.lat.toFixed(4)),
+        lon:Number(item.lon.toFixed(4)),
+        max_temp:convertTemp(item.max_temp,units),
+        min_temp:convertTemp(item.min_temp,units),
+        morn_temp:convertTemp(item.morn_temp,units),
+        day_temp:convertTemp(item.day_temp,units),
+        eve_temp:convertTemp(item.eve_temp,units),
+        night_temp:convertTemp(item.night_temp,units)
+    }))
+
     return(
         <div ref={menuRef} className="relative inline-block">
             <button
                 onClick={() => setOpen(!open)}
-                className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                className="rounded-md bg-blue-600 p-1 text-white hover:bg-blue-700"
                 title="Download"
             >
-                Export ▼
+                <ArrowDownIcon className="w-5 p-0 text-white"/>
             </button>
+
 
             {open && (
                 <div className="absolute  mt-2  rounded-md border bg-white shadow-lg z-50">
                     <button className="block w-full px-4 py-2 text-left hover:bg-gray-100"
-                    onClick={()=>exportPDF(data.data)}>PDF</button>
+                    onClick={()=>{
+                        console.log(exportData)
+                        exportPDF(exportData)}}>PDF</button>
                     <button className="block w-full px-4 py-2 text-left hover:bg-gray-100"
-                     onClick={()=>download(exportXML(data.data),
+                     onClick={()=>download(exportXML(exportData),
                         'weather.xml',"text/xml")
                      }>XML</button>
                     <button className="block w-full px-4 py-2 text-left hover:bg-gray-100"
-                     onClick={()=>download(exportMD(data.data),
+                     onClick={()=>download(exportMD(exportData),
                         "weather.md","text/mark-down")
                      }>MD</button>
                     <button className="block w-full px-4 py-2 text-left hover:bg-gray-100"
-                     onClick={()=>download(exportJSON(data.data),
+                     onClick={()=>download(exportJSON(exportData),
                      "weather.json","text/json")}>JSON</button>
                     <button className="block w-full px-4 py-2 text-left hover:bg-gray-100"
-                     onClick={()=>download(exportCSV(data.data),
+                     onClick={()=>download(exportCSV(exportData),
                         "weather.csv","text/xml")
                      }>CSV</button>
                 </div>

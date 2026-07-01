@@ -20,7 +20,7 @@ export default function LocalWeather({lat,lon,converter}:{lat:number,lon:number,
     useEffect(()=>{
         const fetchLocalWeather = async () =>{
             try{
-                const response = await fetch(`/localWeather?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}`)
+                const response = await fetch(`/api/localWeather?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}`)
                 if (!response.ok) {
                     const error = await response.json();
                     setError(error.error);

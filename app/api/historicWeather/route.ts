@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     const lon = request.nextUrl.searchParams.get("lon");
     const start = request.nextUrl.searchParams.get("start");
     const count = request.nextUrl.searchParams.get("cnt")
-
+    
     if (!lat || !lon) {
         return NextResponse.json(
             { error: "Missing place" },
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     const response = await fetch(
        `https://api.openweathermap.org/data/4.0/onecall/timeline/1day?cnt=${count}&lat=${lat}&lon=${lon}&start=${start}&appid=${key}`
     );
-
+    
     const data = await response.json();
     
     return NextResponse.json(data);

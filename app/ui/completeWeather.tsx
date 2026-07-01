@@ -18,21 +18,29 @@ export default function CompleteWeather(){
     const [placeId, setPlaceId] = useState("");
     const [location, setLocation] = useState<Location|null>(null);
     const [units, setUnits] = useState<TemperatureUnit>('metric')
+    const [error, setError] = useState<string|null>(null)
 
     useEffect(()=>{ 
-      if(!placeId){
-        setLocation(null)
-        return
-      }
       
       const timer = setTimeout(async () =>{
-        const response = await fetch(
-            `/place-details?place=${encodeURIComponent(placeId)}`
-        );
+        setError(null)
+        setLocation(null)
 
-        const details = await response.json();
+        if(!placeId){
+            setLocation(null)
+            return
+        }
+        try{
+            const response = await fetch(
+                `/api/place-details?place=${encodeURIComponent(placeId)}`
+            );
+            
+            const details = await response.json();
 
-        setLocation(details.location)
+            setLocation(details.location)
+        }catch{
+            setError("Couldn't get coordinates. Try again later.")
+        }
         
       },100);
 
@@ -83,8 +91,13 @@ export default function CompleteWeather(){
         <div className="my-4 flex items-center justify-between gap-2 md:my-8">
             <Search placeholder="Search a city..." setPlaceId={setPlaceId} />
         </div>
-        {location && (
+        {(location && !error) && (
             <Forecast5D lat={location?.latitude.toString()} lon={location?.longitude.toString()} units={units} converter={convertTemperature} />
+        )}
+        {error && (
+            <div className="rounded-xl bg-red-100 p-4">
+                {error}
+            </div>
         )}
         </>
     )
