@@ -47,7 +47,7 @@ export default function Page() {
                 start:query.start,
                 end:query.end
             })
-            
+            console.log("Weather",weatherData)
             const missing = findMissingDates(weatherData.map((item)=>{
               return item.dt.toUTCString() //new Date(Number(item.dt)*1000).toUTCString()
             }),unixStart,unixEnd)
@@ -65,11 +65,12 @@ export default function Page() {
                 const removableDates = new Set(weatherData.map(
                 existent=>existent.dt.toUTCString()))
                 missingWeathers = missingWeathers.filter(newWeather => !removableDates.has(newWeather.dt.toUTCString()))
+                console.log(missingWeathers)
                 const created = await createWeather(missingWeathers)
                 missingWeathers = missingWeathers.map((item,idx)=>{return {...item,id:created[idx].id}})
               }            
             }
-
+            console.log("Missing",missingWeathers)
             const allWeather = missingWeathers.length>0?[...weatherData,...missingWeathers]:weatherData          
             
             const formattedWeather = allWeather.
@@ -79,7 +80,7 @@ export default function Page() {
                   return {...item,dt:formattedDate}
                 }
               )
-              
+            console.log("Page",formattedWeather)
             setData(formattedWeather)
           }else{
             setError("Unable to retrieve coordinates.")

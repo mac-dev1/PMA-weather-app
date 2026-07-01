@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
         `https://www.googleapis.com/youtube/v3/search?part=snippet&location=${lat},${lon}`+
         `&locationRadius=${"5km"}&maxResults=5&q=news&type=video&key=${key}`
         );
-        console.log(searchResponse)
+        
         if(!searchResponse.ok){
             throw Error(searchResponse.status.toString())
         }

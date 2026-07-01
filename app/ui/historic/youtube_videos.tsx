@@ -21,19 +21,23 @@ type YoutubeResult = {
 export default function Youtube({lat,lon}:{lat:number,lon:number}){
     const [videos,setVideos] = useState<videoData[]>()
     const [result,setResult] = useState<YoutubeResult>()
-
+    console.log({lat,lon})
 
      useEffect(() => {
         async function loadVideos() {
+            
             const response = await fetch(
                 `/api/youtube?lat=${lat}&lon=${lon}`
             )
             
             const data:YoutubeResult = await response.json() 
+            console.log({data})
             if(!data.success){
                 setResult(data)
+                setVideos(undefined)
                 return
             }
+            console.log("Result",result)
             setVideos(data.data.items.map((item)=>(
                 {id:item.id.videoId,title:item.snippet.title,
                     thumbnail:item.snippet.thumbnails.default.url}

@@ -4,8 +4,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
 
-    const lat = request.nextUrl.searchParams.get("lat");
-    const lon = request.nextUrl.searchParams.get("lon");
+    const lat = request.nextUrl.searchParams.get("lat")?.slice(0,9);
+    const lon = request.nextUrl.searchParams.get("lon")?.slice(0,9);
     const start = request.nextUrl.searchParams.get("start");
     const count = request.nextUrl.searchParams.get("cnt")
     

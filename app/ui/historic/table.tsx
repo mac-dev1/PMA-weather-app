@@ -19,6 +19,7 @@ type TableProps={
 }
 
 export default function HistoricTable({data,loading,error,units,deleteDate,editDate}:TableProps){
+    
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const tableRef = useRef<HTMLDivElement>(null);
 

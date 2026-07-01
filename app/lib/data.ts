@@ -17,7 +17,7 @@ export async function fetchWeather({lat,lon,start,end}:{lat:number,lon:number,st
     (lon BETWEEN ${lon-0.05} AND ${lon+0.05}) AND
     (dt BETWEEN ${start} AND ${end})
     ORDER BY dt`;
-    
+    console.log(data)
    return data
   }catch(error){
     console.error('Database error:',error)
@@ -26,7 +26,7 @@ export async function fetchWeather({lat,lon,start,end}:{lat:number,lon:number,st
 }
 
 export async function createWeather(weatherData:DailyTemp[]){
-  console.log(weatherData)
+  
   const created = await sql `
   INSERT INTO dailytemp (lat,lon,timezone,timezone_offset,dt,sunrise,sunset,moonrise,moonset,
   moon_phase,day_temp,min_temp,max_temp,night_temp,eve_temp,morn_temp,pressure,humidity,
