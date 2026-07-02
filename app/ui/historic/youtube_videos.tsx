@@ -45,14 +45,13 @@ export default function Youtube({lat,lon}:{lat:number,lon:number}){
                 {id:item.id.videoId,title:item.snippet.title,
                     thumbnail:item.snippet.thumbnails.default}
             )))
-            console.log(videos)
         }
 
         loadVideos();
     }, [lat, lon]);
 
     return(
-    <div>
+    <div className="">
         {result && !result.success && result.error &&
          (
             <div className="bg-red-100 rounded"><p className="m-4 w-9/10">{result.error}</p></div>
@@ -60,7 +59,7 @@ export default function Youtube({lat,lon}:{lat:number,lon:number}){
         
             
         {videos &&(
-            <ul className="max-h-96 overflow-y-auto list-none p-0 m-0">{
+            <ul className="list-none p-0 m-0 ">{
                  videos.map(video=>
                     <li key={video.id}>
                         <a href={"https://www.youtube.com/watch?v="+video.id}
@@ -68,7 +67,7 @@ export default function Youtube({lat,lon}:{lat:number,lon:number}){
                          target="_blank"
                          rel="noopener noreferrer"
                          className="flex items-center gap-4 rounded-lg p-2 hover:bg-gray-100 transition
-                         hover:bg-gray-100">
+                         hover:bg-gray-100 focus:bg-gray-100 click:bg-gray-100">
                             <Image
                             width={video.thumbnail.width} height={video.thumbnail.height}
                                 src={video.thumbnail.url}

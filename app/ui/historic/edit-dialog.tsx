@@ -11,13 +11,6 @@ type EditModalProps = {
     ) => Promise<EditResult>; 
 }; 
 
-type ValidationErrors = {
-    humidity?: string[];
-    pressure?: string[];
-    wind_speed?: string[];
-    clouds?: string[];
-    id?: string[];
-};
 
 
 export function EditModal({ item, onClose, onSave, }: EditModalProps) {
@@ -27,6 +20,19 @@ export function EditModal({ item, onClose, onSave, }: EditModalProps) {
     const [pressure, setPressure] = useState(Number(item.pressure)); 
     const [wind_speed, setWindSpeed] = useState(Number(item.wind_speed)); 
     const [clouds, setClouds] = useState(Number(item.clouds)); 
+    const fields:Array<"humidity"|
+                        "pressure"|
+                        "wind_speed"|
+                        "clouds"> = ["humidity",
+                            "pressure",
+                            "wind_speed",
+                            "clouds"]
+    const itemChanged = ()=>{
+        return fields.some(
+            field => item[field] !== {humidity,pressure,wind_speed,clouds}[field]
+        )   
+    }
+    
     
     return ( <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
                 <div className="w-full max-w-md rounded-xl bg-white shadow-2xl"> 
@@ -104,12 +110,18 @@ export function EditModal({ item, onClose, onSave, }: EditModalProps) {
                         <button onClick={onClose} 
                         className="rounded-md border px-4 py-2 transition hover:bg-gray-100" > Cancel </button> 
                         <button onClick={ async () => {
+                            if (!itemChanged()) {
+                                onClose()
+                                return
+                            }
                             const result = await onSave({...item,humidity,pressure,wind_speed,clouds}) 
                             if (!result.success) {
+                                alert("Update error. Try again later.")
                                 setResult(result);
+                                onClose()
                                 return;
                             }
-
+                            alert("Succesful update !")
                             onClose();
                             }
                         }

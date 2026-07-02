@@ -68,26 +68,26 @@ export default function HistoricTable({data,loading,error,units,deleteDate,editD
     
     return(
         <div className="relative">
-            <div ref={tableRef}>
+            <div ref={tableRef} className="h-full">
                 {data &&(
-                    <div className="absolute top-[-10] left-[-10] z-10 ">
+                    <div className="absolute top-[-10] left-[-10] z-30 ">
                         <ExportButton data={data} units={units}/>
                     </div>
                 )}
-                <div className="grid overflow-x-auto rounded-lg border">
-                    <table className="min-w-[1100px] table-auto">
+                <div className="max-h-[20rem] md:max-h-[30rem] overflow-auto rounded-lg border">
+                    <table className="min-w-[1100px] overflow-x-auto table-fixed border-separate border-spacing-0">
                         <thead>
-                            <tr className="bg-gray-100">
-                                <th>Day</th>
-                                <th>Latitude</th>
-                                <th>Longitude</th>
-                                <th>Day Maximum</th>
-                                <th>Day Minimum</th>
-                                <th>Clouds</th>
-                                <th>Wind</th>
-                                <th>Pressure</th>
-                                <th>Edit</th>
-                                <th>Delete</th>
+                            <tr>
+                                <th className="sticky top-0 left-0 z-20 w-35 bg-gray-100 border-r-2 border-r-black">Day</th>
+                                <th className="sticky top-0 z-4 bg-gray-100">Latitude</th>
+                                <th className="sticky top-0 z-4 bg-gray-100">Longitude</th>
+                                <th className="sticky top-0 z-4 bg-gray-100">Day Maximum</th>
+                                <th className="sticky top-0 z-4 bg-gray-100">Day Minimum</th>
+                                <th className="sticky top-0 z-4 bg-gray-100">Clouds</th>
+                                <th className="sticky top-0 z-4 bg-gray-100">Wind</th>
+                                <th className="sticky top-0 z-4 bg-gray-100">Pressure</th>
+                                <th className="sticky right-20 top-0 z-20 bg-gray-200 w-20 border-l-2 border-l-black">Edit</th>
+                                <th className="sticky right-0 top-0 z-20 bg-gray-200 w-20 ">Delete</th>
                             </tr>
                         </thead>
                         <tbody className="text-center border">
@@ -95,7 +95,7 @@ export default function HistoricTable({data,loading,error,units,deleteDate,editD
                                 data.map((item)=>
                                 <tr key={item.id}  onClick={() => setSelectedId(item.id)}
                                 className={`cursor-pointer transition-colors ${selectedId === item.id ? "bg-indigo-100" : "hover:bg-gray-100"}`} >
-                                    <td className="border">{item.dt.split('T')[0].replaceAll('-','/').split('/').reverse().join('/')}</td>
+                                    <td className="sticky left-0 bg-white w-35 border border-r-2 border-r-black">{item.dt.split('T')[0].replaceAll('-','/').split('/').reverse().join('/')}</td>
                                     <td className="border">{Number(item.lat).toFixed(4)}</td>
                                     <td className="border">{Number(item.lon).toFixed(4)}</td>
                                     <td className="border">{convertTemp(item.max_temp)}</td>
@@ -103,14 +103,22 @@ export default function HistoricTable({data,loading,error,units,deleteDate,editD
                                     <td className="border">{item.clouds}</td>
                                     <td className="border">{item.wind_speed}</td>
                                     <td className="border">{item.pressure}</td>
-                                    <td>
+                                    <td className={`
+                                                sticky right-20 bg-white z-10 border 
+                                                border-l-2 border-l-black
+                                            `}>
                                         <button onClick={(e) =>{
                                             e.stopPropagation();
                                             editDate(item)}}>
                                             <PencilSquareIcon className="w-4" />
                                         </button>
                                     </td>
-                                    <td>
+                                    <td className={`
+                                                sticky right-0 bg-white z-10 border
+                                            ${selectedId === item.id
+                                                ? "bg-indigo-100"
+                                                : "bg-white hover:bg-gray-100"}
+                                        `}>
                                         <button onClick={(e) =>{
                                             e.stopPropagation();
                                              deleteDate(item)}}>

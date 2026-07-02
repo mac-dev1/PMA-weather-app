@@ -74,7 +74,7 @@ export default function Page() {
                 const existingDates = new Set(
                     weatherData.map(item => item.dt.toUTCString())
                 );
-
+                
                 for await (const chunk of fetchMissingWeather(
                     latitude,
                     longitude,
@@ -109,13 +109,16 @@ export default function Page() {
                         );
 
                         newRows.forEach(item => {
-                            map.set(
-                                item.dt.toISOString().split("T")[0],
-                                {
-                                    ...item,
-                                    dt: item.dt.toISOString().split("T")[0],
-                                }
-                            );
+                            const key = item.dt.toISOString().split("T")[0];
+                            if (!map.has(key)){
+                              map.set(
+                                  item.dt.toISOString().split("T")[0],
+                                  {
+                                      ...item,
+                                      dt: item.dt.toISOString().split("T")[0],
+                                  }
+                              );
+                            }
                         });
 
                         return [...map.values()].sort(
@@ -164,8 +167,8 @@ export default function Page() {
     
 
     return (
-        <>
-          <div className="flex gap-2 grid grid-cols-1 grid-rows-2 mybp:grid-cols-2  mybp:grid-rows-1">
+        <div className="max-h-full flex flex-col">
+          <div className="shrink-0 gap-2 grid grid-cols-1 grid-rows-2 mybp:grid-cols-2  mybp:grid-rows-1">
             <div>
               <QueryForm onSearch={handleSearch} />
               <div className="py-2 grid grid-rows-2">
@@ -186,18 +189,22 @@ export default function Page() {
             </div>
             
           </div>
-          <div className="grid gap-2 grid-rows-2 grid-cols-1 mybp:grid-rows-1 mybp:grid-cols-[33%_66%]">
+          <div className="max-h-[30rem] min-h-0 flex  flex-col gap-2 mybp:grid mybp:grid-cols-[33%_66%]">
             {location && location.latitude && location.longitude && (
-              <Youtube lat={location.latitude} lon={location.longitude}/>
+              <div className="min-h-48 max-h-96 overflow-y-auto">
+                <Youtube lat={location.latitude} lon={location.longitude}/>
+              </div>
             )}
-            <Table
-                data={data}
-                loading={loading}
-                error={error}
-                units={units}
-                deleteDate={(item) =>setDeleteItem(item)}
-                editDate={(item)=>setEditItem(item)}
-            />
+            <div className="min-h-0">
+              <Table
+                  data={data}
+                  loading={loading}
+                  error={error}
+                  units={units}
+                  deleteDate={(item) =>setDeleteItem(item)}
+                  editDate={(item)=>setEditItem(item)}
+              />
+            </div>
           </div>
           {editItem &&(
             <EditModal 
@@ -219,6 +226,6 @@ export default function Page() {
                   setDeleteItem(null);
               }}/>
           )}
-        </>
+        </div>
     );
 }

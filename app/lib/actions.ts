@@ -41,7 +41,7 @@ const UpdateWeatherSchema = z.object({
     id: z.string(),
     lat: z.number(),
     lon: z.number(),
-    dt: z.number(),
+    dt: z.coerce.string(),
     humidity: z.coerce.number()
         .gte(0,{ message: 'Please enter a humidity value greater than or equal to 0.' })
         .lte(100,{ message: 'Please enter a humidity value lower than or equal to 100.' }),
@@ -75,7 +75,7 @@ export type EditResult =
       };
 
 export async function editWeather(item: Omit<DailyTemp,'dt'>&{dt:string}):Promise<EditResult>{
-
+    console.log("Received item:",item)
     const validated = UpdateWeatherSchema.safeParse(item);
 
     if (!validated.success) {
@@ -119,7 +119,7 @@ export async function editWeather(item: Omit<DailyTemp,'dt'>&{dt:string}):Promis
     }
 
     revalidatePath("/home/historic");
-
+    console.log("Returning success")
     return {
         success: true,
     };
