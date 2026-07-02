@@ -1,4 +1,4 @@
-import { DailyTemp, parseForecast } from "./definitions";
+import { DailyTemp, OpenWeatherDay, parseForecast } from "./definitions";
 
 
 export function chunkDates(dates: string[], size = 10) {
@@ -14,7 +14,7 @@ export function chunkDates(dates: string[], size = 10) {
     return starts;
 }
 
-export async function fetchMissingWeather(
+export async function* fetchMissingWeather(
     lat: number,
     lon: number,
     dates: string[]
@@ -22,17 +22,23 @@ export async function fetchMissingWeather(
     
     const starts = chunkDates(dates, 9);
     
-    const responses = await Promise.all(
-        starts.map(async (item) => {                                               // expect time in seconds
-            const response = await fetch(`/api/historicWeather?lat=${lat}&lon=${lon}&start=${item.start/1000}&cnt=${item.count}`);
-            const data = await response.json()
-            return data.data.map((item:Omit<DailyTemp,'dt'>&{dt:number}) =>{
-                return {...item,
-                        timezone:data.timezone,
-                        timezone_offset:data.timezone_offset,}
-        });
-        })
-    );
-    return responses.flat().map(item => parseForecast(item,lat,lon));
+    for (const item of starts) {
+
+        const response = await fetch(
+            `/api/historicWeather?lat=${lat}&lon=${lon}&start=${item.start / 1000}&cnt=${item.count}`
+        );
+
+        const data = await response.json();
+
+        const weather:DailyTemp[] = data.data
+            .map((item: OpenWeatherDay&{timezone:string,timezone_offset:number}) => ({
+                ...item,
+                timezone: data.timezone,
+                timezone_offset: data.timezone_offset,
+            }))
+            .map((item:OpenWeatherDay) => parseForecast(item, lat, lon));
+
+        yield weather;
+    }
     
 }

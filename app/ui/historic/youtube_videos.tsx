@@ -7,7 +7,11 @@ import Image from 'next/image';
 type videoData={
     id: string; 
     title: string; 
-    thumbnail: string;
+    thumbnail: {
+        height:number,
+        width:number,
+        url:string
+    }
 }
 
 type YoutubeResult = {
@@ -21,7 +25,6 @@ type YoutubeResult = {
 export default function Youtube({lat,lon}:{lat:number,lon:number}){
     const [videos,setVideos] = useState<videoData[]>()
     const [result,setResult] = useState<YoutubeResult>()
-    console.log({lat,lon})
 
      useEffect(() => {
         async function loadVideos() {
@@ -31,17 +34,18 @@ export default function Youtube({lat,lon}:{lat:number,lon:number}){
             )
             
             const data:YoutubeResult = await response.json() 
-            console.log({data})
+            
             if(!data.success){
                 setResult(data)
                 setVideos(undefined)
                 return
             }
-            console.log("Result",result)
+            
             setVideos(data.data.items.map((item)=>(
                 {id:item.id.videoId,title:item.snippet.title,
-                    thumbnail:item.snippet.thumbnails.default.url}
+                    thumbnail:item.snippet.thumbnails.default}
             )))
+            console.log(videos)
         }
 
         loadVideos();
@@ -66,8 +70,8 @@ export default function Youtube({lat,lon}:{lat:number,lon:number}){
                          className="flex items-center gap-4 rounded-lg p-2 hover:bg-gray-100 transition
                          hover:bg-gray-100">
                             <Image
-                            width={96} height={64}
-                                src={video.thumbnail}
+                            width={video.thumbnail.width} height={video.thumbnail.height}
+                                src={video.thumbnail.url}
                                 alt={video.title}
                                 className="hidden md:block rounded object-cover flex-shrink-0"
                             />

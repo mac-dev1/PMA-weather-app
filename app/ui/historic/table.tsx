@@ -22,7 +22,7 @@ export default function HistoricTable({data,loading,error,units,deleteDate,editD
     
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const tableRef = useRef<HTMLDivElement>(null);
-
+    
     useEffect(() => {
         if (!tableRef.current) return;
 

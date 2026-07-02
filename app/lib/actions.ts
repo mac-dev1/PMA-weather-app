@@ -39,7 +39,9 @@ export async function deleteWeather(item: Omit<DailyTemp,'dt'>&{dt:string}) {
 
 const UpdateWeatherSchema = z.object({
     id: z.string(),
-
+    lat: z.number(),
+    lon: z.number(),
+    dt: z.number(),
     humidity: z.coerce.number()
         .gte(0,{ message: 'Please enter a humidity value greater than or equal to 0.' })
         .lte(100,{ message: 'Please enter a humidity value lower than or equal to 100.' }),
@@ -85,15 +87,30 @@ export async function editWeather(item: Omit<DailyTemp,'dt'>&{dt:string}):Promis
 
     const weather = validated.data;
     try{
-        await sql`
-            UPDATE dailyTemp
-            SET
-                humidity=${weather.humidity},
-                pressure=${weather.pressure},
-                wind_speed=${weather.wind_speed},
-                clouds=${weather.clouds}
-            WHERE id=${weather.id}
-        `;
+        if(weather.id){
+            await sql`
+                UPDATE dailyTemp
+                SET
+                    humidity=${weather.humidity},
+                    pressure=${weather.pressure},
+                    wind_speed=${weather.wind_speed},
+                    clouds=${weather.clouds}
+                WHERE id=${weather.id}
+            `;
+        }else{
+            await sql`
+                UPDATE dailyTemp
+                SET
+                    humidity = ${weather.humidity},
+                    pressure = ${weather.pressure},
+                    wind_speed = ${weather.wind_speed},
+                    clouds = ${weather.clouds}
+                WHERE
+                    lat = ${weather.lat}
+                    AND lon = ${weather.lon}
+                    AND dt = ${weather.dt}
+            `;
+        }
     }catch{
         return {
             success: false,

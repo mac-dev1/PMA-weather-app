@@ -26,17 +26,26 @@ export default function Page() {
     const [deleteItem,setDeleteItem] = useState<Omit<DailyTemp,'dt'>&{dt:string}|null>()
     const [editItem,setEditItem] = useState<Omit<DailyTemp,'dt'>&{dt:string}|null>()
 
+    useEffect(()=>{
+      const timer = setTimeout(()=>{
+        if(typeof(data)==="object" && data && data.length>0){
+          setLoading(false);
+        }
+      })
+    },[data])
+
     async function handleSearch(query: Query) {
         setLoading(true);
         setError("");
         
         try{
+          
           const placeResponse = await fetch(`/api/place-details?place=${encodeURIComponent(query.placeId)}`)
           const placeData = await placeResponse.json()
-          
           const { latitude, longitude } = placeData.location;
           
           setLocation(placeData.location)
+          
           if(latitude && longitude){
             const unixStart = new Date(query.start).getTime()
             const unixEnd = new Date(query.end).getTime()
@@ -47,41 +56,77 @@ export default function Page() {
                 start:query.start,
                 end:query.end
             })
-            console.log("Weather",weatherData)
+            
             const missing = findMissingDates(weatherData.map((item)=>{
               return item.dt.toUTCString() //new Date(Number(item.dt)*1000).toUTCString()
             }),unixStart,unixEnd)
 
-            let missingWeathers = Array<DailyTemp>()
-            if(missing.length > 0){
-              
-              missingWeathers = await fetchMissingWeather(
-                  latitude,
-                  longitude,
-                  missing
-              );
-              
-              if(missingWeathers.length>0){
-                const removableDates = new Set(weatherData.map(
-                existent=>existent.dt.toUTCString()))
-                missingWeathers = missingWeathers.filter(newWeather => !removableDates.has(newWeather.dt.toUTCString()))
-                console.log(missingWeathers)
-                const created = await createWeather(missingWeathers)
-                missingWeathers = missingWeathers.map((item,idx)=>{return {...item,id:created[idx].id}})
-              }            
-            }
-            console.log("Missing",missingWeathers)
-            const allWeather = missingWeathers.length>0?[...weatherData,...missingWeathers]:weatherData          
+            const formattedWeather = weatherData
+                .map(item => ({
+                    ...item,
+                    dt: item.dt.toISOString().split("T")[0],
+                }));
+
+            setData(formattedWeather);
+
             
-            const formattedWeather = allWeather.
-              sort((a, b) => a.dt.getTime() - b.dt.getTime()).
-                map((item) =>{
-                  const formattedDate = item.dt.toISOString().split('T')[0]//`${item.dt.getUTCDate()}/${item.dt.getUTCMonth()+1}/${item.dt.getUTCFullYear()}`
-                  return {...item,dt:formattedDate}
-                }
-              )
-            console.log("Page",formattedWeather)
-            setData(formattedWeather)
+            if(missing.length > 0){
+                const existingDates = new Set(
+                    weatherData.map(item => item.dt.toUTCString())
+                );
+
+                for await (const chunk of fetchMissingWeather(
+                    latitude,
+                    longitude,
+                    missing
+                )) {
+
+                    const filtered = chunk.filter(
+                        item => !existingDates.has(item.dt.toUTCString())
+                    );
+
+                    if (filtered.length === 0)
+                        continue;
+
+                    const created = await createWeather(filtered);
+
+                    const newRows = filtered.map((item, idx) => ({
+                        ...item,
+                        id: created[idx].id,
+                    }));
+
+                    newRows.forEach(item =>
+                        existingDates.add(item.dt.toUTCString())
+                    );
+                    
+                    setData(prev => {
+
+                        if (!prev)
+                            return prev;
+
+                        const map = new Map(
+                            prev.map(item => [item.dt, item])
+                        );
+
+                        newRows.forEach(item => {
+                            map.set(
+                                item.dt.toISOString().split("T")[0],
+                                {
+                                    ...item,
+                                    dt: item.dt.toISOString().split("T")[0],
+                                }
+                            );
+                        });
+
+                        return [...map.values()].sort(
+                            (a, b) =>
+                                new Date(a.dt).getTime() -
+                                new Date(b.dt).getTime()
+                        );
+                    });
+                }     
+            }
+            
           }else{
             setError("Unable to retrieve coordinates.")
           }
@@ -89,7 +134,6 @@ export default function Page() {
             setError("Unable to retrieve weather.");
             setData(null);
         }
-        setLoading(false);
     }
 
     const deleteDate = async (daily:Omit<DailyTemp,'dt'> & {dt:string})=>{
