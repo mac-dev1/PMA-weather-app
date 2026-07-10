@@ -1,5 +1,6 @@
 "use server";
 
+import bcrypt from 'bcrypt';
 import postgres from "postgres";
 import { revalidatePath } from "next/cache";
 import { redirect } from 'next/navigation';
@@ -131,7 +132,7 @@ export async function authenticate(
 ) {
   try {
     await signIn('credentials', formData);
-  } catch (error) {
+} catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
         case 'CredentialsSignin':
@@ -144,7 +145,35 @@ export async function authenticate(
   }
 }
 
+export async function register(
+  prevState: {error:boolean,msg:string} | undefined,
+  formData: FormData,
+) {
+  try {
+    const name = String(formData.get('name'))
+    const email = String(formData.get('email'))
+    const password = String(formData.get('password'))
+    if(!email || !password){
+        throw new Error('You have to introduce an email and password to register')
+    }
+    const userExists = await sql<{email:string}[]> `SELECT email FROM Users WHERE email=${email}`
+    if(userExists[0]?.email){
+        return {error:true,msg:'Mail already registered'}
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const created = await sql`INSERT INTO USERS (name,email,password) VALUES (${name},${email},${hashedPassword})`
+    if(created){
+        revalidatePath('/login')
+        return {error:false,msg:'User succesfully registered'}
+    } 
+    return {error:true,msg:"Couldn't create user"} 
+    } catch (error) {
+        return {error:true,msg:"An unexpected error occurred"};
+  }
+}
+
 
 export async function logout() {
     await signOut({ redirectTo: '/' });
 }
+
